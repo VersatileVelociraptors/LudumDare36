@@ -4,13 +4,18 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 
+import io.github.versatilevelociraptors.cat.states.GameStateManager;
+import io.github.versatilevelociraptors.cat.states.PlayState;
+
 
 public class Game implements ApplicationListener {
 	
-	public static final String TITLE = " ";
+	public static final String TITLE = "cAt";
 	private static final int WIDTH = 800;
 	private static final int HEIGHT = 1000;
 	public static final double SCALE = 1;
+	
+	public static final double NS = 1000000000.0 / 60.0;
 	
     private GameStateManager manager;
 	
@@ -39,7 +44,7 @@ public class Game implements ApplicationListener {
 	@Override
 	public void create() {
 		manager = new GameStateManager();
-	
+		manager.push(new PlayState(manager));
 		delta = 0;
 		lastTime = System.nanoTime();
 		timer = System.currentTimeMillis();
@@ -59,7 +64,23 @@ public class Game implements ApplicationListener {
 
 	@Override
 	public void render() {
-		// TODO Auto-generated method stub
+		long now = System.nanoTime();
+		delta += now - lastTime;
+		lastTime = now;
+		
+		// update if it is time to
+		if(delta >= NS){
+			manager.update((float) delta);
+			updates++;
+			delta -= NS;
+		}
+		manager.render();
+		
+		if(System.currentTimeMillis() - timer > 1000){
+			timer += 1000;
+			System.out.println(updates + " UPS");
+			updates = 0;
+		}
 		
 	}
 
